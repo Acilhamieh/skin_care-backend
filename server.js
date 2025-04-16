@@ -1,8 +1,13 @@
 const express = require('express');
+const dotenv = require('dotenv');
+
+// Load environment variables from .env file
+dotenv.config();
+
 const app = express();
 
-// Define a port
-const PORT = 3000;
+// Define a port (from .env)
+const PORT = process.env.PORT || 3000;
 
 // Simple route
 app.get('/', (req, res) => {
