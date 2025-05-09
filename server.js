@@ -8,8 +8,22 @@ dotenv.config();
 const app = express();
 
 // ✅ Enable CORS for frontend (localhost:3000)
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://skin-care-frontend-jhsn.vercel.app',  // ⬅️ put your deployed frontend URL here
+];
+
 app.use(cors({
-    origin: ['https://skin-care-frontend-jhsn.vercel.app'],
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 
