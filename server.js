@@ -9,7 +9,7 @@ const app = express();
 
 // ✅ Enable CORS for frontend (localhost:3000)
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://skin-care-frontend-jhsn.vercel.app'],
+    origin: ['https://skin-care-frontend-jhsn.vercel.app'],
   credentials: true,
 }));
 
