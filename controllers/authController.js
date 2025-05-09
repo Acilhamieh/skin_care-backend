@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+/*import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { findUserByEmail, createUser } from '../models/userModel.js';
 
@@ -83,4 +83,4 @@ export const login = (req, res) => {
       }
     });
   });
-};
+};*/
