@@ -59,3 +59,50 @@ export const createCategoryWithImages = async ({ name, description, images }) =>
       return category;
     });
   };
+// delete a category 
+export const deleteCategory = async (categoryId) => {
+    return await sql.begin(async sql => {
+      // First, delete the associated images
+      await sql`
+        DELETE FROM files
+        WHERE categoryId = ${categoryId};
+      `;
+  
+      // Then, delete the category itself
+      const result = await sql`
+        DELETE FROM categories
+        WHERE id = ${categoryId}
+        RETURNING *;
+      `;
+  
+      if (result.length === 0) {
+        throw new Error('Category not found');
+      }
+  
+      return { success: true, message: 'Category and associated images deleted successfully' };
+    });
+  };
+  // get category by id 
+  export const getCategoryById = async (id) => {
+    return await sql`
+      SELECT 
+        c.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', f.id,
+              'fileUrl', f.fileUrl,
+              'type', f.type,
+              'createdAt', f.createdAt,
+              'updatedAt', f.updatedAt
+            )
+          ) FILTER (WHERE f.id IS NOT NULL),
+          '[]'
+        ) AS images
+      FROM categories c
+      LEFT JOIN files f ON f.categoryId = c.id
+      WHERE c.id = ${id}  -- Here we filter by category ID
+      GROUP BY c.id
+      ORDER BY c.createdAt DESC
+    `;
+  };
