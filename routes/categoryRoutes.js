@@ -5,7 +5,15 @@ import upload from '../middlewares/uploadMiddleware.js';
 const router = express.Router();
 
 //add category
-router.post('/addcategory', upload.array('images'), categoryController.createCategory);
+router.post(
+  '/addcategory',
+  upload.fields([
+    { name: 'images', maxCount: 10 },      // multiple images
+    { name: 'baseImage', maxCount: 1 }     // single base image
+  ]),
+  categoryController.createCategory
+);
+
 //get all category
 router.get('/', categoryController.getCategories);
 //delete a category

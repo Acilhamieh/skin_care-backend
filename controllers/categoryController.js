@@ -22,17 +22,28 @@ export const getCategories = async (req, res) => {
   // add a category
   
   export const createCategory = async (req, res) => {
-    try {
-      const { name, description } = req.body;
-      const images = req.files; // coming from multer
-  
-      const category = await createCategoryWithImages({ name, description, images });
-  
-      res.status(201).json({ category, message: 'Category created with images!' });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  };
+  try {
+    const { name, description } = req.body;
+
+    // Extract files from the request
+    const images = req.files?.images || []; // multiple images
+    const baseImage = req.files?.baseImage?.[0]; // single base image
+
+    // Call the model function with correct parameters
+    const category = await createCategoryWithImages({
+      name,
+      description,
+      images,
+      baseImage,
+    });
+
+    res.status(201).json({ category, message: 'Category created with images!' });
+  } catch (err) {
+    console.error('Error creating category:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
   // delete a category with its images 
 export const deleteCategoryController = async (req, res) => {
   const { categoryId } = req.params;
