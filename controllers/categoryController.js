@@ -3,6 +3,7 @@ import * as Category from '../models/categoryModel.js';
 import { createCategoryWithImages } from '../models/categoryModel.js';
 import { deleteCategory } from '../models/categoryModel.js';
 import { getCategoryById } from '../models/categoryModel.js';
+import { updateCategory } from '../models/categoryModel.js';
 
 export const getCategories = async (req, res) => {
     try {
@@ -72,5 +73,28 @@ export const getCategoryByid = async (req, res) => {
   } catch (error) {
     console.error('Error fetching category by ID:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+//update a category
+
+export const handleUpdateCategory = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { name, description } = req.body;
+    const baseImage = req.files?.baseImage?.[0] || null;
+    const newImages = req.files?.images || [];
+
+    const updatedCategory = await updateCategory({
+      id,
+      name,
+      description,
+      baseImage,
+      newImages,
+    });
+
+    res.status(200).json({ message: 'Category updated successfully', category: updatedCategory });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

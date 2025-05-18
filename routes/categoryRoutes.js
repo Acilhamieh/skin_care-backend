@@ -13,7 +13,15 @@ router.post(
   ]),
   categoryController.createCategory
 );
-
+//update a category
+router.put(
+  '/:id',
+  upload.fields([
+    { name: 'baseImage', maxCount: 1 },
+    { name: 'images', maxCount: 5 },
+  ]),
+  categoryController.handleUpdateCategory
+);
 //get all category
 router.get('/', categoryController.getCategories);
 //delete a category

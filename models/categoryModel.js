@@ -135,3 +135,67 @@ export const deleteCategory = async (categoryId) => {
       ORDER BY c.createdAt DESC
     `;
   };
+
+  //update a category
+  export const updateCategory = async ({ id, name, description, baseImage, newImages }) => {
+  return await sql.begin(async sql => {
+    let baseImageUrl;
+
+    // Upload new base image if provided
+    if (baseImage) {
+      const { data, error } = await supabase.storage
+        .from('category-images')
+        .upload(`categories/base_${Date.now()}_${baseImage.originalname}`, baseImage.buffer, {
+          contentType: baseImage.mimetype,
+        });
+
+      if (error) {
+        throw new Error(`Failed to upload base image: ${error.message}`);
+      }
+
+      baseImageUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/category-images/${data.path}`;
+
+      // Update category with baseImage
+      await sql`
+        UPDATE categories
+        SET name = ${name}, description = ${description}, baseImage = ${baseImageUrl}, updatedAt = NOW()
+        WHERE id = ${id};
+      `;
+    } else {
+      // Update category without changing baseImage
+      await sql`
+        UPDATE categories
+        SET name = ${name}, description = ${description}, updatedAt = NOW()
+        WHERE id = ${id};
+      `;
+    }
+
+    // Upload and insert new images (optional)
+    if (newImages && newImages.length > 0) {
+      for (const image of newImages) {
+        const { data, error } = await supabase.storage
+          .from('category-images')
+          .upload(`categories/${Date.now()}_${image.originalname}`, image.buffer, {
+            contentType: image.mimetype,
+          });
+
+        if (error) {
+          throw new Error(`Failed to upload image: ${error.message}`);
+        }
+
+        const imageUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/category-images/${data.path}`;
+
+        await sql`
+          INSERT INTO files (categoryId, fileUrl, type)
+          VALUES (${id}, ${imageUrl}, 'image');
+        `;
+      }
+    }
+
+    const [updatedCategory] = await sql`
+      SELECT * FROM categories WHERE id = ${id};
+    `;
+
+    return updatedCategory;
+  });
+};
