@@ -1,78 +1,48 @@
-/*import bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { findUserByEmail, createUser } from '../models/userModel.js';
 
-// Register
-export const register = (req, res) => {
-  const {
-    firstName,
-    lastName,
-    email,
-    password,
-    age,
-    phone,
-    role // optional, default is 'user'
-  } = req.body;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-  // Check if user already exists
-  findUserByEmail(email, (err, result) => {
-    if (err) return res.status(500).json({ message: 'Database error', error: err });
+// REGISTER
+export const registerUser = async (req, res) => {
+  const { firstName, lastName, email, password, age, phone, role = 'user' } = req.body;
 
-    if (result.length) {
-      return res.status(400).json({ message: 'User already exists!' });
-    }
+  try {
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) return res.status(400).json({ message: 'Email already registered' });
 
-    // Hash password
-    const hashedPassword = bcrypt.hashSync(password, 10);
-
-    // Build user object
-    const newUser = {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await createUser({
       firstName,
       lastName,
       email,
       password: hashedPassword,
-      age: age || null,
-      phone: phone || null,
-      role: role || 'user'
-    };
-
-    // Insert into database
-    createUser(newUser, (err, result) => {
-      if (err) return res.status(500).json({ message: 'Database error', error: err });
-      res.status(201).json({ message: 'User registered successfully' });
+      age,
+      phone,
+      role
     });
-  });
+
+    res.status(201).json(newUser);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
 };
 
-// Login
-export const login = (req, res) => {
+// LOGIN
+export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  // Find user by email
-  findUserByEmail(email, (err, result) => {
-    if (err) return res.status(500).json({ message: 'Database error', error: err });
+  try {
+    const user = await findUserByEmail(email);
+    if (!user) return res.status(401).json({ message: 'Invalid email or password' });
 
-    if (!result.length) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
-    const user = result[0];
+    const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
 
-    // Compare passwords
-    const validPassword = bcrypt.compareSync(password, user.password);
-    if (!validPassword) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
-
-    res.status(200).json({
-      message: 'Login successful',
+    res.json({
       token,
       user: {
         id: user.id,
@@ -82,5 +52,7 @@ export const login = (req, res) => {
         role: user.role
       }
     });
-  });
-};*/
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
