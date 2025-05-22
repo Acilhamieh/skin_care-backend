@@ -42,12 +42,19 @@ export const loginUser = async (req, res) => {
 
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
 
+    // Set the token in an httpOnly cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // use true in production (HTTPS)
+      sameSite: 'Lax', // Can be 'Strict', 'Lax', or 'None'
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
     res.json({
-      token,
       user: {
         id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        firstName: user.firstname,
+        lastName: user.lastname,
         email: user.email,
         role: user.role
       }
@@ -55,4 +62,10 @@ export const loginUser = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
+};
+
+// LOGOUT
+export const logoutUser = (req, res) => {
+  res.clearCookie('token');
+  res.json({ message: 'Logged out successfully' });
 };

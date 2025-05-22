@@ -1,9 +1,13 @@
 import express from 'express';
-import { getUsers,deleteUser } from '../controllers/usercontroller.js';
+import { getUsers, deleteUser } from '../controllers/usercontroller.js';
+import { isAuthenticated, isAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/users', getUsers); // GET all users
-router.delete('/users/:id', deleteUser); // DELETE user by ID
+// GET all users (Admin only)
+router.get('/users', isAuthenticated, isAdmin, getUsers);
+
+// DELETE user by ID (Admin only)
+router.delete('/users/:id', isAuthenticated, isAdmin, deleteUser);
 
 export default router;

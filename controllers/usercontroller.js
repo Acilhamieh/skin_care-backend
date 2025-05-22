@@ -6,9 +6,14 @@ export const getUsers = async (req, res) => {
     const users = await getAllUsers();
     res.json(users);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch users' });
+    console.error('Error fetching users:', err.message); // Log the error message in the server console
+    res.status(500).json({
+      error: 'Failed to fetch users',
+      message: err.message, // Include the specific error message
+    });
   }
 };
+
 
 // Delete a user
 export const deleteUser = async (req, res) => {

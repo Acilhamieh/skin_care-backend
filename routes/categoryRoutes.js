@@ -2,30 +2,46 @@
 import express from 'express';
 import * as categoryController from '../controllers/categoryController.js';
 import upload from '../middlewares/uploadMiddleware.js';
+import { isAuthenticated, isAdmin } from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
 
-//add category
+// Add category (Admin only)
 router.post(
   '/addcategory',
+  isAuthenticated,
+  isAdmin,
   upload.fields([
-    { name: 'images', maxCount: 10 },      // multiple images
-    { name: 'baseImage', maxCount: 1 }     // single base image
+    { name: 'images', maxCount: 10 },
+    { name: 'baseImage', maxCount: 1 },
   ]),
   categoryController.createCategory
 );
-//update a category
+
+// Update a category (Admin only)
 router.put(
   '/:id',
+  isAuthenticated,
+  isAdmin,
   upload.fields([
     { name: 'baseImage', maxCount: 1 },
     { name: 'images', maxCount: 5 },
   ]),
   categoryController.handleUpdateCategory
 );
-//get all category
+
+// Get all categories (Public)
 router.get('/', categoryController.getCategories);
-//delete a category
-router.delete('/:categoryId',categoryController.deleteCategoryController);
-//get category by id 
+
+// Get category by ID (Public)
 router.get('/:categoryId', categoryController.getCategoryByid);
+
+// Delete a category (Admin only)
+router.delete(
+  '/:categoryId',
+  isAuthenticated,
+  isAdmin,
+  categoryController.deleteCategoryController
+);
+
 export default router;

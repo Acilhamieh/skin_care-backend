@@ -2,7 +2,7 @@ import sql from '../config/db.js';
 
 // Get all users
 export const getAllUsers = async () => {
-  return await sql`SELECT * FROM users ORDER BY createdAt DESC`;
+  return await sql`SELECT * FROM users ORDER BY "createdAt" DESC;`;
 };
 
 // Delete user by ID

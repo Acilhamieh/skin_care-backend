@@ -2,12 +2,17 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors'; // ✅ import cors
 import './config/db.js';  
+import cookieParser from 'cookie-parser';
 import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 const app = express();
+app.use(express.json());
+//This enables Express to read cookies sent by the client.
+app.use(cookieParser());
+
 
 // ✅ Enable CORS for frontend (localhost:3000)
 

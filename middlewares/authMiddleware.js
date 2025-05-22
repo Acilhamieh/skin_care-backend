@@ -1,24 +1,25 @@
 import jwt from 'jsonwebtoken';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-export const protect = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
+// Check if user is authenticated
+export const isAuthenticated = (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: 'Not authenticated' });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+    req.user = decoded; // Save user data (id, role)
     next();
-  } catch {
-    res.status(403).json({ message: 'Invalid or expired token' });
+  } catch (err) {
+    return res.status(403).json({ message: 'Invalid token' });
   }
 };
 
-export const authorize = (roles = []) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Not authorized' });
-    }
-    next();
-  };
+// Only admin access
+export const isAdmin = (req, res, next) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied: Admins only' });
+  }
+  next();
 };
