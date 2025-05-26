@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import sessionRoutes from './routes/sessionRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -42,7 +43,8 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api', userRoutes);
 //auth
 app.use('/api/auth', authRoutes);
-
+//sessions
+app.use('/api/sessions', sessionRoutes);
 // Server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
