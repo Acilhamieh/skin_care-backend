@@ -7,6 +7,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
+import bookingsRoutes from './routes/bookingsRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -45,6 +46,8 @@ app.use('/api', userRoutes);
 app.use('/api/auth', authRoutes);
 //sessions
 app.use('/api/sessions', sessionRoutes);
+//bookigs
+app.use('/api/bookings', bookingsRoutes);
 // Server
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
