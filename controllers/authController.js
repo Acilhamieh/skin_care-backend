@@ -42,15 +42,9 @@ export const loginUser = async (req, res) => {
 
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
 
-    // Set the token in an httpOnly cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true, 
-      sameSite: 'None',
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
-    });
-
+    // Send token in response body instead of cookie
     res.json({
+      token,
       user: {
         id: user.id,
         firstName: user.firstname,
@@ -64,8 +58,7 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// LOGOUT
+// LOGOUT (optional for localStorage-based auth)
 export const logoutUser = (req, res) => {
-  res.clearCookie('token');
-  res.json({ message: 'Logged out successfully' });
+  res.json({ message: 'Logout handled on frontend by clearing localStorage' });
 };
